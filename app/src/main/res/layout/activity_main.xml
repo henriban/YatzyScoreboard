@@ -1,0 +1,69 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".MainActivity"
+    android:id="@+id/parent">
+
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_centerHorizontal="true">
+       <!-- android:background="@drawable/main_background">-->
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="50dp">
+
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Yatzy"
+                android:id="@+id/yatzyBtn"
+                android:onClick="yatzy"
+                android:background="@drawable/main_button"/>
+
+            <Button
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Maxi Yatzy"
+                android:id="@+id/maxiBtn"
+                android:onClick="maxiYatzy"
+                android:background="@drawable/main_button"
+                android:layout_marginTop="7dp" />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Creat new rules"
+                android:id="@+id/editorBtn"
+                android:onClick="editor"
+                android:background="@drawable/main_button"
+                android:layout_marginTop="7dp" />
+
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Load Game"
+                android:id="@+id/loadBtn"
+                android:onClick="maxiYatzy"
+                android:background="@drawable/main_button"
+                android:layout_marginTop="7dp" />
+
+            <Button
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:text="Options"
+                android:id="@+id/optionsBtn"
+                android:background="@drawable/main_button"
+                android:layout_marginTop="7dp" />
+        </LinearLayout>
+
+    </LinearLayout>
+</RelativeLayout>

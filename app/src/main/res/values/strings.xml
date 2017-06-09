@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">Yatzy</string>
+
+    <string name="action_settings">Settings</string>
+    <string name="gotIt">Got it!</string> //Text for ok btn
+    <string name="saveAs">"Save as:  "</string>
+    <string name="save">Save</string>
+
+    <string name="yes">Yes</string>
+    <string name="cancel">Cancel</string>
+
+</resources>
