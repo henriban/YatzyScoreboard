@@ -13,31 +13,18 @@ import java.io.ObjectOutputStream;
 
 public final class GameManager {
 
-    private static GameModel game;
-
-    /**
-     * GameManager is Singleton
-     * @param context Context of the application
-     * @return The player instance
-     */
-
-    public static GameModel getGameInstance(Context context) {
-        if (game != null) {
-            return game;
-        }
-        return Load(context);
-    }
-
     /**
      * Load game from disk
      * @param activity Activity in which context we are
      * @return GameModel object
      */
 
-    public static GameModel Load(Context activity){
+    //public static GameModel Load(Context activity){
+    public static SaveGameModel Load(Context activity){
         try {
 
-            GameModel game;
+            //GameModel game;
+            SaveGameModel game;
 
             File mFolder = new File(activity.getFilesDir()+"/Game");
             File itemFile = new File(mFolder.getAbsolutePath()+"/gameFile");
@@ -55,7 +42,8 @@ public final class GameManager {
                 objectInputStream.close();
                 return null;
             }
-            game = (GameModel) object;
+            //game = (GameModel) object;
+            game = (SaveGameModel) object;
             objectInputStream.close();
 
             return game;
@@ -75,7 +63,8 @@ public final class GameManager {
      * @param activity Activity in which you access files
      */
 
-    public static void Save(GameModel game, Activity activity){
+    //public static void Save(GameModel game, Activity activity){
+    public static void Save(SaveGameModel game, Activity activity){
         try {
 
             File mFolder = new File(activity.getFilesDir()+"/Game");

@@ -16,12 +16,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".Game"
-        android:label="Yatzy"/>
-        <activity android:name=".Editor"
+        <activity
+            android:name=".Game"
+            android:label="Yatzy"/>
+        <activity
+            android:name=".Editor"
             android:label="Editor"/>
-        <activity android:name=".LoadGameActivity"
-            android:label="Load Game"/>
+        <activity
+            android:name=".LoadGameActivity"
+            android:label="Load Game"
+            android:theme="@android:style/Theme.Dialog"/>
     </application>
-
 </manifest>

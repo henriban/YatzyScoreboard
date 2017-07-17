@@ -92,16 +92,16 @@
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceLarge" />
 
-        <LinearLayout
-            android:id="@+id/extraLayout"
-            android:orientation="horizontal"
+        <EditText
+            android:id="@+id/gameNameEditText"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-        </LinearLayout>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/text_edit"
+            android:visibility="gone"/>
 
         <LinearLayout
-
             android:layout_width="wrap_content"
             android:layout_height="match_parent">
 
@@ -122,7 +122,6 @@
                 android:text="@string/cancel"
                 android:padding="0dp"
                 android:background="@drawable/main_button"
-                android:onClick="hideAlertBox"
                 android:layout_marginStart="10dp"/>
 
         </LinearLayout>

@@ -8,14 +8,17 @@ public class GameModel implements Serializable {
     private String gameName;
     private String gameType;
 
+    private Rules rules;
+
     private int numbersOfPlayers;
 
     private List<String> playersName;
     private List<List<Integer>> playersScore;
 
-    public GameModel(String gameName, String gameType,int numbersOfPlayers, List<String> playersName, List<List<Integer>> playersScore) {
+    public GameModel(String gameName, Rules rules, int numbersOfPlayers, List<String> playersName, List<List<Integer>> playersScore) {
         this.gameName = gameName;
-        this.gameType = gameType;
+        this.gameType = rules.getGameType();
+        this.rules = rules;
         this.numbersOfPlayers = numbersOfPlayers;
         this.playersName = playersName;
         this.playersScore = playersScore;
@@ -59,5 +62,13 @@ public class GameModel implements Serializable {
 
     public void setGameType(String gameType) {
         this.gameType = gameType;
+    }
+
+    public Rules getRules() {
+        return rules;
+    }
+
+    public void setRules(Rules rules) {
+        this.rules = rules;
     }
 }

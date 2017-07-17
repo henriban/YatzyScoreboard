@@ -1,16 +1,16 @@
 package com.yatzy.henrikanderson.yatzy;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SaveGameModel implements Serializable{
 
     private List<GameModel> savedGames;
 
-    public SaveGameModel(List<GameModel> savedGames) {
-        this.savedGames = savedGames;
+    public SaveGameModel() {
+        savedGames = new ArrayList<>();
     }
-
 
     public List<GameModel> getSavedGames() {
         return savedGames;
@@ -27,5 +27,9 @@ public class SaveGameModel implements Serializable{
             }
         }
         return null;
+    }
+
+    public void addGame(GameModel game){
+        savedGames.add(game);
     }
 }

@@ -23,6 +23,7 @@ import android.widget.RelativeLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,41 +34,28 @@ public class Game extends AppCompatActivity {
 
     private TableLayout table;
     private int numOfPlayers = 4;
+    private Rules rule;
+    private String gameName;
 
     //private List<Integer> colors = Arrays.asList(Color.argb(1, 200, 0, 0), Color.argb(1, 0, 200, 0));
 
-    private List<String> scoring = Arrays.asList("Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Bonus",
-            "One Pair", "Two Pairs", "Three of a Kind", "Four of a Kind", "Small Straight", "Large Straight",
-            "Full House", "Chance", "Yatzy", "Total");
-    private List<String> maxScore = Arrays.asList("5", "10", "15", "20", "25", "30", "50",
-            "12", "22", "18", "24", "15", "20",
-            "28", "30", "50", "375");
+    private List<String> scoring;
+    private List<String> maxScore;
     //min valid score
-    private List<String> minScore = Arrays.asList("1", "2", "3", "4", "5", "6", "0",
-            "2", "6", "3", "4", "0", "0",
-            "7", "6", "0", "49");
+    private List<String> minScore;
 
-    private List<String> rules = Arrays.asList(
-            "The sum of all dice showing the number 1." ,
-            "The sum of all dice showing the number 2." ,
-            "The sum of all dice showing the number 3." ,
-            "The sum of all dice showing the number 4." ,
-            "The sum of all dice showing the number 5." ,
-            "The sum of all dice showing the number 6." ,
-            "If a player manages to score at least 63 points (an average of three of each number) in the upper section, they are awarded a bonus of 50 points." ,
-
-            "Two dice showing the same number. \n\nScore: Sum of those two dice." ,
-            "Two different pairs of dice. \n\nScore: Sum of dice in those two pairs." ,
-            "Three dice showing the same number. \n\nScore: Sum of those three dice." ,
-            "Four dice with the same number. \n\nScore: Sum of those four dice." ,
-            "The combination 1-2-3-4-5. \n\nScore: 15 points (sum of all the dice)." ,
-            "The combination 2-3-4-5-6. \n\nScore: 20 points (sum of all the dice)." ,
-            "Any set of three combined with a different pair. \n\nScore: Sum of all the dice." ,
-            "Any combination of dice. \n\nScore: Sum of all the dice." ,
-            "All five dice with the same number. \n\nScore: 50 points.",
-            "Total score");  //Tester dette
+    private List<String> rules;
 
     private String gameType;
+
+    private int requiredPointsForBonus;
+    private int bonus;
+
+    private Button yesBtn;
+    private Button cancelBtn;
+    private EditText gameNameEditText;
+
+    private TextView alertText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,40 +69,79 @@ public class Game extends AppCompatActivity {
         actionBar.setHomeButtonEnabled(true);
         actionBar.setDisplayHomeAsUpEnabled(true);
 
+        //init elements from activity
+        table = (TableLayout) findViewById(R.id.table);
+        row1 = new TableRow(this);
+
+        ruleBox = (LinearLayout) findViewById(R.id.ruleBox);
+        darkBackground = (LinearLayout) findViewById(R.id.darkBackground);
+        alertBox = (LinearLayout) findViewById(R.id.alertBox);
+
+        yesBtn = (Button) findViewById(R.id.yesBtn);
+        cancelBtn= (Button) findViewById(R.id.cancelBtn);
+        gameNameEditText = (EditText) findViewById(R.id.gameNameEditText);
+
+        alertText = (TextView) findViewById(R.id.alertText);
+
+        cancelBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                hideAlertBox();
+            }
+        });
+
         //Catch a string gameType from main
         //Tells what game is it
         Bundle bundle = getIntent().getExtras();
         gameType = "null";
-        if(bundle != null){
-            gameType = bundle.getString("key");
+        if(bundle != null) {
+            if (bundle.getString("key") != null) {
+                gameType = bundle.getString("key");
+
+                initGameType(gameType);
+            } else {
+                GameModel gameModel = (GameModel) getIntent().getExtras().getSerializable("gameModel");
+
+                gameType = gameModel.getGameType();
+                initGameType(gameType);
+
+                numOfPlayers = gameModel.getNumbersOfPlayers();
+
+                init();
+
+                //Set players names
+                for (int i = 0; i < numOfPlayers - 1; i++) {
+                    View view = row1.getChildAt(i + 2);
+                    if (view instanceof EditText) {
+                        ((EditText) view).setText(gameModel.getPlayersName().get(i));
+                    }
+
+                    // Set players scores
+                    for (int j = 0; j < gameModel.getPlayersScore().get(i).size() - 1; j++) {
+                        playerEditTextList.get(i).get(j).setText(String.valueOf(gameModel.getPlayersScore().get(i).get(j)));
+                    }
+                }
+                setTotalScore();
+
+            }
+
+
+            // Makes the super cool background :D
+            RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.parent);
+            GradientDrawable gd = new GradientDrawable(
+                    GradientDrawable.Orientation.TOP_BOTTOM,
+                    new int[]{0xFFE0D6B4, 0xFFD4C490});
+            gd.setCornerRadius(0f);
+
+            relativeLayout.setBackgroundDrawable(gd);
+
+            //initialize the sheet
+            buildFirstRow();
+            init();
+
+            //update the sheet to show 0's in "bonus" and "total"
+            setTotalScore();
         }
-        initGameType(gameType);
-
-        //init elements from activity
-        table = (TableLayout) findViewById(R.id.table);
-        ruleBox = (LinearLayout) findViewById(R.id.ruleBox);
-        row1 = new TableRow(this);
-        darkBackground = (LinearLayout) findViewById(R.id.darkBackground);
-        alertBox = (LinearLayout) findViewById(R.id.alertBox);
-        yesBtn = (Button) findViewById(R.id.yesBtn);
-        extraLayout = (LinearLayout) findViewById(R.id.extraLayout);
-
-
-        // Makes the super cool background :D
-        RelativeLayout relativeLayout = (RelativeLayout) findViewById(R.id.parent);
-        GradientDrawable gd = new GradientDrawable(
-                GradientDrawable.Orientation.TOP_BOTTOM,
-                new int[] {0xFFE0D6B4,0xFFD4C490});
-        gd.setCornerRadius(0f);
-
-        relativeLayout.setBackgroundDrawable(gd);
-
-        //initialize the sheet
-        buildFirstRow();
-        init();
-
-        //update the sheet to show 0's in "bonus" and "total"
-        setTotalScore();
     }
 
     /**
@@ -123,52 +150,15 @@ public class Game extends AppCompatActivity {
      */
 
     private void initGameType(String value) {
-        if(value.equals("Yatzy")){
-            requiredPointsForBonus = 63;
-        }else if(value.equals("Maxi Yatzy")){
-            this.scoring = Arrays.asList("Ones", "Twos", "Threes", "Fours", "Fives", "Sixes", "Bonus",
-                    "One Pair", "Two Pairs", "Three Pairs",
-                    "Three of a Kind", "Four of a Kind", "Five of a Kind", "Small Straight", "Large Straight", "Full Straight",
-                    "Full House", "Castle" ,"Tower",
-                    "Chance", "Maxi Yatzy", "Total");
-            this.maxScore = Arrays.asList("6", "12", "18", "24", "30", "36", "100",
-                    "12", "22", "30",
-                    "18", "24", "30","15", "20", "21",
-                    "28","33", "34",
-                    "36", "100", "375");
-            rules = Arrays.asList(
-                    "The sum of all dice showing the number 1." ,
-                    "The sum of all dice showing the number 2." ,
-                    "The sum of all dice showing the number 3." ,
-                    "The sum of all dice showing the number 4." ,
-                    "The sum of all dice showing the number 5." ,
-                    "The sum of all dice showing the number 6." ,
-                    "If a player manages to score at least 84 points (an average of four of each number) in the upper section, they are awarded a bonus of 100 points." ,
+        this.rule = new Rules(value);
+        this.scoring = rule.getScoring();
+        this.maxScore = rule.getMaxScore();
+        this.rules = rule.getRules();
 
-                    "Two dice showing the same number. \n\nScore: Sum of those two dice." , // One Pair
-                    "Two different pairs of dice. \n\nScore: Sum of dice in those two pairs." , // Two Pair
-                    "Three different pairs of dice. \n\nScore: Sum of dice in those three pairs.", // Three Pairs
+        this.requiredPointsForBonus = rule.getRequiredPointsForBonus();
+        this.bonus = rule.getBonus();
 
-                    "Three dice showing the same number. \n\nScore: Sum of those three dice." , // Three of a Kind
-                    "Four dice showing the same number. \n\nScore: Sum of those four dice.", //Four of a Kind
-                    "Five dice with the same number. \n\nScore: Sum of those five dice." , // Five of a Kind
-                    "The combination 1-2-3-4-5. \n\nScore: 15 points (sum of all the dice)." , // Small Straight
-                    "The combination 2-3-4-5-6. \n\nScore: 20 points (sum of all the dice)." , // Large Straight
-                    "The combination 1-2-3-4-5-6. Score: 21 points (sum of all the dice).", // Full Straight
-
-                    "Any set of three combined with a different pair. \n\nScore: Sum of all the dice." , // Full House
-                    "Two sets of three dice showing the same number. Score: Sum of all the dice.", // Castle
-                    "A set of four combined with a set of two. Score: Sum of all the dice.", // Tower
-
-                    "Any combination of dice. \n\nScore: Sum of all the dice." ,  // Chance
-                    "All six dice with the same number. \n\nScore: 100 points." , // Maxi Yatzy
-                    "Total score");  // Total
-            requiredPointsForBonus = 84;
-            bonus = 100;
-        }
-
-        //TODO: Valid all maxScore is int
-        bonus = Integer.parseInt(maxScore.get(6));
+        this.gameType = rule.getGameType();
     }
 
     @Override
@@ -215,8 +205,23 @@ public class Game extends AppCompatActivity {
     }
 
     private void save() {
-        GameModel gameModel = new GameModel("Game1", gameType, numOfPlayers, getPlayersName(), getPlayersScore());
-        GameManager.Save(gameModel, this);
+        if(gameName == null){
+            saveAs();
+        }else {
+            GameModel gameModel = new GameModel(gameName, rule, numOfPlayers, getPlayersName(), getPlayersScore());
+            SaveGameModel game = new SaveGameModel();
+
+            if (GameManager.Load(this) != null) {
+                game = GameManager.Load(this);
+            }
+
+            if (game != null) {
+                game.addGame(gameModel);
+            }
+            GameManager.Save(game, this);
+
+            Toast.makeText(this, "Game saved", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private List<String> getPlayersName(){
@@ -251,11 +256,25 @@ public class Game extends AppCompatActivity {
     }
 
     private void saveAs() {
+        showAlert();
+        gameNameEditText.setVisibility(View.VISIBLE);
+        alertText.setText("Save game as:");
 
+        yesBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                gameName = gameNameEditText.getText().toString();
+                hideAlertBox();
+                save();
+            }
+        });
     }
 
     private void load() {
-        GameModel gameModel = GameManager.Load(this);
+        startActivity(new Intent(this, LoadGameActivity.class));
+        /*
+        SaveGameModel savedGameModel = GameManager.Load(this);
+        GameModel gameModel = savedGameModel.getGame("Game1");
 
         if(gameModel != null){
 
@@ -284,15 +303,15 @@ public class Game extends AppCompatActivity {
         }else{
             System.out.println("GameModel --> NullPoint ");
         }
+        */
     }
 
-    Button yesBtn;
-    LinearLayout extraLayout;
+
 
     private void restart() {
         showAlert();
-        TextView text = (TextView) findViewById(R.id.alertText);
-        text.setText("Do you want to restart? \n ");
+        alertText.setText("Do you want to restart? \n ");
+        gameNameEditText.setVisibility(View.GONE);
 
         yesBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -345,7 +364,6 @@ public class Game extends AppCompatActivity {
                         if (!hasFocus) {
                             checkValidInput();
                             setTotalScore();
-
                         }
                     }
                 });
@@ -371,10 +389,6 @@ public class Game extends AppCompatActivity {
             }
         }
     }
-
-
-
-
 
     /**
      * Setup for text views, sets the drawable and text
@@ -415,7 +429,6 @@ public class Game extends AppCompatActivity {
         hideSoftKeyboard(Game.this);
         alertBox.setVisibility(View.VISIBLE);
         darkBackground.setVisibility(View.VISIBLE);
-        extraLayout.removeAllViews();
         yesBtn.setVisibility(View.VISIBLE);
     }
 
@@ -429,20 +442,6 @@ public class Game extends AppCompatActivity {
     LinearLayout alertBox;
 
     private void showRules(String text) {
-        /*
-        if(scoring.contains(text) && scoring.indexOf(text) != 16){
-            int index = scoring.indexOf(text);
-            System.out.println(index);
-            AlertDialog.Builder builder = new AlertDialog.Builder(new ContextThemeWrapper(this, R.style.AlertDialog));
-            builder.setTitle(text)
-                    .setMessage(rules.get(index).toString())
-                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            // continue with delete
-                        }
-                    })
-                    .show();
-        }*/
 
         ruleBox.setVisibility(View.VISIBLE);
         darkBackground.setVisibility(View.VISIBLE);
@@ -451,8 +450,6 @@ public class Game extends AppCompatActivity {
         TextView ruleText = (TextView) findViewById(R.id.ruletext);
         TextView okTextBtn = (TextView) findViewById(R.id.okTextBtn);
 
-        //TODO: Tester dette
-        //if(scoring.contains(text) && scoring.indexOf(text) != 16) {
         if(scoring.contains(text)){
             int index = scoring.indexOf(text);
             ruleBox.setBackgroundDrawable(getResources().getDrawable(R.drawable.rulebox));
@@ -481,7 +478,7 @@ public class Game extends AppCompatActivity {
         hideRules();
     }
 
-    public void hideAlertBox(View view) {
+    public void hideAlertBox() {
         alertBox.setVisibility(View.GONE);
         darkBackground.setVisibility(View.INVISIBLE);
     }
@@ -560,7 +557,6 @@ public class Game extends AppCompatActivity {
                     if (!hasFocus) {
                         checkValidInput();
                         setTotalScore();
-
                     }
                 }
             });
@@ -572,9 +568,6 @@ public class Game extends AppCompatActivity {
     /**
      * Setts the total score for all players
      */
-
-    private int requiredPointsForBonus = 63;
-    private int bonus = 50;
 
     private void setTotalScore(){
         for(int p = 0; p < numOfPlayers; p++) {

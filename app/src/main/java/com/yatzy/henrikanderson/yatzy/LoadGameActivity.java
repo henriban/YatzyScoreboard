@@ -1,18 +1,18 @@
 package com.yatzy.henrikanderson.yatzy;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-public class LoadGameActivity extends AppCompatActivity {
+public class LoadGameActivity extends Activity {
 
     private LinearLayout loadLayout;
 
@@ -38,10 +38,6 @@ public class LoadGameActivity extends AppCompatActivity {
 
         relativeLayout.setBackgroundDrawable(gd);
 
-        //Back button in actionbar
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setHomeButtonEnabled(true);
-        actionBar.setDisplayHomeAsUpEnabled(true);
 
         loadLayout = (LinearLayout) findViewById(R.id.loadLayout);
 
@@ -76,15 +72,52 @@ public class LoadGameActivity extends AppCompatActivity {
     }
 
     private void initLoadGameLayout() {
-        GameManager.Load(this);
+        SaveGameModel saveGameModel = GameManager.Load(this);
 
+        if(saveGameModel != null) {
+
+            for (final GameModel gameModel : saveGameModel.getSavedGames()) {
+                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+                Button gameButton = new Button(this);
+                gameButton.setText(gameModel.getGameName());
+                gameButton.setTextSize(28);
+                params.setMargins(0,7,0,7);
+
+                gameButton.setLayoutParams(params);
+
+
+                gameButton.setBackgroundResource(R.drawable.main_button);
+
+                gameButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        openGame(gameModel);
+                    }
+                });
+
+                loadLayout.addView(gameButton);
+            }
+        }else{
+            TextView textView = new TextView(this);
+            textView.setText("Can't find any saved games");
+            loadLayout.addView(textView);
+        }
+    }
+
+    private void openGame(GameModel gameModel) {
         Intent intent = new Intent(LoadGameActivity.this, Game.class);
+
         Bundle bundle = new Bundle();
-        bundle.putString("key", "Yatzy");
+        bundle.putSerializable("gameModel", gameModel);
+
+//        Bundle bundle = new Bundle();
+//        bundle.putString("key", "Yatzy");
         intent.putExtras(bundle);
         startActivity(intent);
         finish();
     }
+
 
     private void showAlertBox(String gameName) {
         darkBackground.setVisibility(View.VISIBLE);
@@ -97,6 +130,7 @@ public class LoadGameActivity extends AppCompatActivity {
         darkBackground.setVisibility(View.GONE);
         alertBox.setVisibility(View.GONE);
     }
+
 
 
 }
